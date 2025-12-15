@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🎅 Festival Filter Camera</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h2>🎄 Loading Camera...</h2>
+            <p id="loading-message">Initializing...</p>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-screen" class="error-screen hidden">
+        <div class="error-content">
+            <span class="error-icon">⚠️</span>
+            <h2>Camera Error</h2>
+            <p id="error-message"></p>
+            <button id="retry-button" class="btn btn-primary">Retry</button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app hidden">
+        <!-- Camera View -->
+        <div class="camera-container">
+            <video id="video" autoplay playsinline muted></video>
+            <canvas id="canvas"></canvas>
+            <div id="fps-counter" class="fps-counter">FPS: --</div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <!-- Filter Selection -->
+            <div class="filter-selector">
+                <h3>Filters</h3>
+                <div class="filter-grid" id="filter-grid">
+                    <button class="filter-btn active" data-filter="none">
+                        <span class="filter-icon">🚫</span>
+                        <span class="filter-name">None</span>
+                    </button>
+                    <button class="filter-btn" data-filter="santa-hat">
+                        <span class="filter-icon">🎅</span>
+                        <span class="filter-name">Santa Hat</span>
+                    </button>
+                    <button class="filter-btn" data-filter="antlers">
+                        <span class="filter-icon">🦌</span>
+                        <span class="filter-name">Antlers</span>
+                    </button>
+                    <button class="filter-btn" data-filter="beard">
+                        <span class="filter-icon">🧔</span>
+                        <span class="filter-name">Beard</span>
+                    </button>
+                    <button class="filter-btn" data-filter="snowflakes">
+                        <span class="filter-icon">❄️</span>
+                        <span class="filter-name">Snowflakes</span>
+                    </button>
+                    <button class="filter-btn" data-filter="sparkles">
+                        <span class="filter-icon">✨</span>
+                        <span class="filter-name">Sparkles</span>
+                    </button>
+                    <button class="filter-btn" data-filter="snow">
+                        <span class="filter-icon">🌨️</span>
+                        <span class="filter-name">Snow</span>
+                    </button>
+                    <button class="filter-btn" data-filter="winter-bg">
+                        <span class="filter-icon">🏔️</span>
+                        <span class="filter-name">Winter BG</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="switch-camera-btn" class="btn btn-secondary" title="Switch Camera">
+                    🔄
+                </button>
+                <button id="capture-btn" class="btn btn-primary btn-large">
+                    📸 Capture
+                </button>
+                <button id="gallery-btn" class="btn btn-secondary" title="Gallery">
+                    🖼️ <span id="photo-count" class="badge">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="gallery-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📸 Photo Gallery</h2>
+                <button id="close-gallery-btn" class="btn-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="gallery-grid" class="gallery-grid">
+                    <div class="empty-gallery">
+                        <span class="empty-icon">📷</span>
+                        <p>No photos yet!</p>
+                        <p class="small">Capture some festive moments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="clear-all-btn" class="btn btn-danger">🗑️ Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"></script>
+    <script src="detectionEngine.js"></script>
+    <script src="filters.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
