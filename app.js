@@ -219,10 +219,30 @@ class FestivalCameraApp {
             // Draw video
             this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
             
+            // Update face detection indicator
+            this.updateFaceIndicator();
+            
             // Apply filters
             if (typeof FilterEngine !== 'undefined' && this.currentFilter !== 'none') {
                 FilterEngine.render(this.canvas, this.ctx, this.video);
             }
+        }
+    }
+    
+    updateFaceIndicator() {
+        const indicator = document.getElementById('face-indicator');
+        const status = document.getElementById('face-status');
+        
+        if (!indicator || !status) return;
+        
+        const landmarks = DetectionEngine?.getFaceLandmarks();
+        
+        if (landmarks) {
+            indicator.className = 'face-indicator detected';
+            status.textContent = '✅ Face detected!';
+        } else {
+            indicator.className = 'face-indicator not-detected';
+            status.textContent = '👤 Looking for face...';
         }
     }
     
@@ -237,11 +257,22 @@ class FestivalCameraApp {
         captureCanvas.height = this.canvas.height;
         const captureCtx = captureCanvas.getContext('2d');
         
-        // Copy current canvas content
-        captureCtx.drawImage(this.canvas, 0, 0);
+        // Draw video frame first
+        captureCtx.drawImage(this.video, 0, 0, captureCanvas.width, captureCanvas.height);
+        
+        // Apply current filter to capture
+        if (typeof FilterEngine !== 'undefined' && this.currentFilter !== 'none') {
+            FilterEngine.render(captureCanvas, captureCtx, this.video);
+        }
         
         // Convert to blob and save
         captureCanvas.toBlob((blob) => {
+            if (!blob) {
+                console.error('Failed to create blob');
+                this.isCapturing = false;
+                return;
+            }
+            
             const photo = {
                 id: Date.now(),
                 blob: blob,

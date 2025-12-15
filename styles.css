@@ -149,6 +149,28 @@ body {
     z-index: 10;
 }
 
+.face-indicator {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    transition: background 0.3s ease;
+}
+
+.face-indicator.detected {
+    background: rgba(76, 175, 80, 0.6);
+}
+
+.face-indicator.not-detected {
+    background: rgba(255, 107, 107, 0.6);
+}
+
 /* Controls */
 .controls {
     background: linear-gradient(to top, #1a1a2e 0%, rgba(26, 26, 46, 0.95) 100%);

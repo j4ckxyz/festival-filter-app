@@ -21,6 +21,11 @@ class FilterEngine {
     static render(canvas, ctx, video) {
         const landmarks = DetectionEngine.getFaceLandmarks();
         
+        // Debug: log if landmarks detected (only occasionally to avoid spam)
+        if (Math.random() < 0.01) {
+            console.log('Filter:', this.activeFilter, 'Landmarks:', landmarks ? 'detected' : 'none');
+        }
+        
         switch (this.activeFilter) {
             case 'santa-hat':
                 this.renderSantaHat(ctx, canvas, landmarks);
@@ -239,6 +244,8 @@ class FilterEngine {
     }
     
     static drawSnowflake(ctx, x, y, size) {
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1;
         ctx.beginPath();
         for (let i = 0; i < 6; i++) {
             const angle = (Math.PI / 3) * i;
@@ -251,6 +258,7 @@ class FilterEngine {
         ctx.stroke();
         
         // Center dot
+        ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
         ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
         ctx.fill();
