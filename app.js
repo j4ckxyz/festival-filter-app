@@ -418,20 +418,52 @@ class FestivalCameraApp {
         
         if (isIOS) {
             // On iOS, open image in new tab so user can long-press and save
-            const win = window.open();
+            const win = window.open('', '_blank');
             win.document.write(`
                 <html>
                 <head>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Festival Photo</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+                    <title>Download Festival Photo</title>
                     <style>
-                        body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-                        img { max-width: 100%; max-height: 100vh; }
-                        .instructions { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 10px; text-align: center; }
+                        body { 
+                            margin: 0; 
+                            background: #000; 
+                            display: flex; 
+                            flex-direction: column;
+                            align-items: center; 
+                            justify-content: center; 
+                            min-height: 100vh;
+                            padding: 20px;
+                            box-sizing: border-box;
+                        }
+                        img { 
+                            max-width: 100%; 
+                            max-height: 80vh;
+                            object-fit: contain;
+                            border-radius: 10px;
+                        }
+                        .instructions { 
+                            background: rgba(255,255,255,0.95); 
+                            color: #000; 
+                            padding: 15px 20px; 
+                            border-radius: 10px; 
+                            text-align: center;
+                            margin-bottom: 20px;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                        }
+                        .instructions strong {
+                            display: block;
+                            font-size: 18px;
+                            margin-bottom: 5px;
+                        }
                     </style>
                 </head>
                 <body>
-                    <div class="instructions">📥 Long press image to save to Photos</div>
+                    <div class="instructions">
+                        <strong>📥 Long press image to save to Photos</strong>
+                        <span>Tap and hold the image, then select "Add to Photos"</span>
+                    </div>
                     <img src="${photo.data}" alt="Festival Photo">
                 </body>
                 </html>
