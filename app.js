@@ -35,6 +35,9 @@ class FestivalCameraApp {
             this.updateLoadingMessage('Loading detection models...');
             await this.setupDetection();
             
+            this.updateLoadingMessage('Loading filter assets...');
+            await FilterEngine.loadAssets();
+            
             this.updateLoadingMessage('Setting up filters...');
             this.setupUI();
             this.loadPhotos();

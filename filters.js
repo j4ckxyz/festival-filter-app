@@ -6,6 +6,39 @@ class FilterEngine {
     static snowflakes = [];
     static backgroundImage = null;
     static assetCache = {};
+    static assetsLoaded = false;
+    
+    static async loadAssets() {
+        if (this.assetsLoaded) return;
+        
+        console.log('Loading filter assets...');
+        
+        // Load images
+        const assets = {
+            santaHat: 'assets/filters/santa_hat_PNG63.png',
+            antlers: 'assets/filters/reinder-antlers.png',
+            beard: 'assets/filters/santa-beard.png'
+        };
+        
+        const loadImage = (src) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        };
+        
+        try {
+            this.assetCache.santaHat = await loadImage(assets.santaHat);
+            this.assetCache.antlers = await loadImage(assets.antlers);
+            this.assetCache.beard = await loadImage(assets.beard);
+            this.assetsLoaded = true;
+            console.log('✅ Filter assets loaded successfully');
+        } catch (error) {
+            console.error('Failed to load filter assets:', error);
+        }
+    }
     
     static setActiveFilter(filterName) {
         this.activeFilter = filterName;
@@ -52,156 +85,68 @@ class FilterEngine {
     }
     
     static renderSantaHat(ctx, canvas, landmarks) {
-        if (!landmarks) return;
+        if (!landmarks || !this.assetCache.santaHat) return;
         
         const box = DetectionEngine.calculateFaceBox(landmarks);
         if (!box) return;
         
-        const hatWidth = box.width * canvas.width * 1.5;
-        const hatHeight = hatWidth * 0.8;
+        const img = this.assetCache.santaHat;
+        
+        // Calculate hat dimensions based on face width
+        const hatWidth = box.width * canvas.width * 1.8;
+        const aspectRatio = img.height / img.width;
+        const hatHeight = hatWidth * aspectRatio;
+        
+        // Position hat on top of head, slightly overlapping
         const hatX = box.centerX * canvas.width - hatWidth / 2;
-        const hatY = box.y * canvas.height - hatHeight * 0.85;
+        const hatY = box.y * canvas.height - hatHeight * 0.75;
         
-        // Draw Santa Hat using canvas shapes
         ctx.save();
-        
-        // Main red part (triangle)
-        ctx.fillStyle = '#DC143C';
-        ctx.beginPath();
-        ctx.moveTo(hatX + hatWidth * 0.1, hatY + hatHeight * 0.7);
-        ctx.lineTo(hatX + hatWidth * 0.9, hatY + hatHeight * 0.7);
-        ctx.lineTo(hatX + hatWidth * 0.7, hatY);
-        ctx.closePath();
-        ctx.fill();
-        
-        // White trim at bottom
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(hatX + hatWidth * 0.1, hatY + hatHeight * 0.7, hatWidth * 0.8, hatHeight * 0.1);
-        
-        // White pom-pom at top
-        ctx.beginPath();
-        ctx.arc(hatX + hatWidth * 0.7, hatY, hatWidth * 0.1, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Add some texture with lighter red
-        ctx.fillStyle = '#E63946';
-        ctx.globalAlpha = 0.3;
-        ctx.beginPath();
-        ctx.moveTo(hatX + hatWidth * 0.1, hatY + hatHeight * 0.7);
-        ctx.lineTo(hatX + hatWidth * 0.5, hatY + hatHeight * 0.4);
-        ctx.lineTo(hatX + hatWidth * 0.7, hatY);
-        ctx.closePath();
-        ctx.fill();
-        
+        ctx.drawImage(img, hatX, hatY, hatWidth, hatHeight);
         ctx.restore();
     }
     
     static renderAntlers(ctx, canvas, landmarks) {
-        if (!landmarks) return;
+        if (!landmarks || !this.assetCache.antlers) return;
         
         const box = DetectionEngine.calculateFaceBox(landmarks);
         if (!box) return;
         
-        const antlerSize = box.width * canvas.width * 0.6;
-        const centerX = box.centerX * canvas.width;
-        const topY = box.y * canvas.height - antlerSize * 0.3;
+        const img = this.assetCache.antlers;
+        
+        // Calculate antler dimensions based on face width
+        const antlerWidth = box.width * canvas.width * 2.0;
+        const aspectRatio = img.height / img.width;
+        const antlerHeight = antlerWidth * aspectRatio;
+        
+        // Position antlers on top of head
+        const antlerX = box.centerX * canvas.width - antlerWidth / 2;
+        const antlerY = box.y * canvas.height - antlerHeight * 0.6;
         
         ctx.save();
-        ctx.strokeStyle = '#8B4513';
-        ctx.lineWidth = canvas.width * 0.01;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        
-        // Left antler
-        this.drawAntler(ctx, centerX - antlerSize * 0.3, topY, antlerSize, -1);
-        
-        // Right antler
-        this.drawAntler(ctx, centerX + antlerSize * 0.3, topY, antlerSize, 1);
-        
+        ctx.drawImage(img, antlerX, antlerY, antlerWidth, antlerHeight);
         ctx.restore();
     }
     
-    static drawAntler(ctx, x, y, size, direction) {
-        // Main branch
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + direction * size * 0.1, y - size * 0.4);
-        ctx.stroke();
-        
-        // Side branches
-        ctx.beginPath();
-        ctx.moveTo(x + direction * size * 0.05, y - size * 0.2);
-        ctx.lineTo(x + direction * size * 0.2, y - size * 0.25);
-        ctx.stroke();
-        
-        ctx.beginPath();
-        ctx.moveTo(x + direction * size * 0.08, y - size * 0.3);
-        ctx.lineTo(x + direction * size * 0.15, y - size * 0.4);
-        ctx.stroke();
-    }
-    
     static renderBeard(ctx, canvas, landmarks) {
-        if (!landmarks) return;
+        if (!landmarks || !this.assetCache.beard) return;
         
         const box = DetectionEngine.calculateFaceBox(landmarks);
         if (!box) return;
         
-        const beardWidth = box.width * canvas.width * 1.2;
-        const beardHeight = beardWidth * 0.8;
-        const beardX = box.centerX * canvas.width;
-        const beardY = landmarks.chin.y * canvas.height;
+        const img = this.assetCache.beard;
+        
+        // Calculate beard dimensions based on face width
+        const beardWidth = box.width * canvas.width * 1.6;
+        const aspectRatio = img.height / img.width;
+        const beardHeight = beardWidth * aspectRatio;
+        
+        // Position beard on lower face/chin area
+        const beardX = box.centerX * canvas.width - beardWidth / 2;
+        const beardY = landmarks.mouthBottom.y * canvas.height - beardHeight * 0.2;
         
         ctx.save();
-        
-        // Create fluffy beard effect
-        ctx.fillStyle = '#FFFFFF';
-        ctx.globalAlpha = 0.9;
-        
-        // Main beard shape (rounded bottom)
-        ctx.beginPath();
-        ctx.ellipse(
-            beardX,
-            beardY + beardHeight * 0.2,
-            beardWidth * 0.5,
-            beardHeight * 0.4,
-            0, 0, Math.PI * 2
-        );
-        ctx.fill();
-        
-        // Upper beard parts
-        ctx.beginPath();
-        ctx.ellipse(
-            beardX - beardWidth * 0.2,
-            beardY,
-            beardWidth * 0.25,
-            beardHeight * 0.25,
-            0, 0, Math.PI * 2
-        );
-        ctx.fill();
-        
-        ctx.beginPath();
-        ctx.ellipse(
-            beardX + beardWidth * 0.2,
-            beardY,
-            beardWidth * 0.25,
-            beardHeight * 0.25,
-            0, 0, Math.PI * 2
-        );
-        ctx.fill();
-        
-        // Add texture with semi-transparent circles
-        ctx.globalAlpha = 0.5;
-        for (let i = 0; i < 20; i++) {
-            const angle = (Math.PI / 20) * i;
-            const radius = beardWidth * 0.4;
-            const fluffX = beardX + Math.cos(angle - Math.PI / 2) * radius * 0.8;
-            const fluffY = beardY + beardHeight * 0.2 + Math.sin(angle - Math.PI / 2) * radius * 0.6;
-            
-            ctx.beginPath();
-            ctx.arc(fluffX, fluffY, beardWidth * 0.08, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        
+        ctx.drawImage(img, beardX, beardY, beardWidth, beardHeight);
         ctx.restore();
     }
     
