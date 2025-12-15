@@ -63,6 +63,13 @@ class FestivalCameraApp {
             this.stream = await navigator.mediaDevices.getUserMedia(constraints);
             this.video.srcObject = this.stream;
             
+            // Update video class for camera orientation
+            if (this.facingMode === 'user') {
+                this.video.classList.remove('rear-camera');
+            } else {
+                this.video.classList.add('rear-camera');
+            }
+            
             // Wait for video to be ready
             await new Promise((resolve) => {
                 this.video.onloadedmetadata = () => {
@@ -219,15 +226,30 @@ class FestivalCameraApp {
             // Clear canvas
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             
+            // Mirror canvas for selfie camera
+            this.ctx.save();
+            if (this.facingMode === 'user') {
+                this.ctx.translate(this.canvas.width, 0);
+                this.ctx.scale(-1, 1);
+            }
+            
             // Draw video
             this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+            
+            this.ctx.restore();
             
             // Update face detection indicator
             this.updateFaceIndicator();
             
-            // Apply filters
+            // Apply filters (after restoring transform)
             if (typeof FilterEngine !== 'undefined' && this.currentFilter !== 'none') {
+                this.ctx.save();
+                if (this.facingMode === 'user') {
+                    this.ctx.translate(this.canvas.width, 0);
+                    this.ctx.scale(-1, 1);
+                }
                 FilterEngine.render(this.canvas, this.ctx, this.video);
+                this.ctx.restore();
             }
         }
     }
@@ -260,12 +282,27 @@ class FestivalCameraApp {
         captureCanvas.height = this.canvas.height;
         const captureCtx = captureCanvas.getContext('2d');
         
+        // Mirror for selfie camera
+        captureCtx.save();
+        if (this.facingMode === 'user') {
+            captureCtx.translate(captureCanvas.width, 0);
+            captureCtx.scale(-1, 1);
+        }
+        
         // Draw video frame first
         captureCtx.drawImage(this.video, 0, 0, captureCanvas.width, captureCanvas.height);
         
-        // Apply current filter to capture
+        captureCtx.restore();
+        
+        // Apply current filter to capture (with mirroring)
         if (typeof FilterEngine !== 'undefined' && this.currentFilter !== 'none') {
+            captureCtx.save();
+            if (this.facingMode === 'user') {
+                captureCtx.translate(captureCanvas.width, 0);
+                captureCtx.scale(-1, 1);
+            }
             FilterEngine.render(captureCanvas, captureCtx, this.video);
+            captureCtx.restore();
         }
         
         // Convert to blob and save
@@ -376,10 +413,38 @@ class FestivalCameraApp {
         const photo = this.photos.find(p => p.id === photoId);
         if (!photo) return;
         
-        const link = document.createElement('a');
-        link.href = photo.data;
-        link.download = `festival-photo-${photo.id}.png`;
-        link.click();
+        // iOS Safari workaround - open in new window for long press save
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
+        if (isIOS) {
+            // On iOS, open image in new tab so user can long-press and save
+            const win = window.open();
+            win.document.write(`
+                <html>
+                <head>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Festival Photo</title>
+                    <style>
+                        body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+                        img { max-width: 100%; max-height: 100vh; }
+                        .instructions { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 10px; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <div class="instructions">📥 Long press image to save to Photos</div>
+                    <img src="${photo.data}" alt="Festival Photo">
+                </body>
+                </html>
+            `);
+        } else {
+            // Standard download for other browsers
+            const link = document.createElement('a');
+            link.href = photo.data;
+            link.download = `festival-photo-${photo.id}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     }
     
     deletePhoto(photoId) {
