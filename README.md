@@ -2,6 +2,8 @@
 
 A real-time, mobile-first web application that brings festive AR filters to your camera feed with face detection and background replacement - all running on-device!
 
+**🎉 [Try it live!](https://j4ckxyz.github.io/festival-filter-app/)** | **[View Source](https://github.com/j4ckxyz/festival-filter-app)**
+
 ![Festival Filter Camera](https://img.shields.io/badge/status-ready-brightgreen) ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 
 ## ✨ Features

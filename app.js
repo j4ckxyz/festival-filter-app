@@ -73,13 +73,32 @@ class FestivalCameraApp {
             window.addEventListener('resize', () => this.resizeCanvas());
             
         } catch (error) {
+            // Check if desktop and show mobile recommendation
+            const isDesktop = window.innerWidth >= 769 && !('ontouchstart' in window);
+            
             if (error.name === 'NotAllowedError') {
-                throw new Error('Camera permission denied. Please allow camera access and reload.');
+                if (isDesktop) {
+                    this.showMobileRecommendation();
+                } else {
+                    throw new Error('Camera permission denied. Please allow camera access and reload.');
+                }
             } else if (error.name === 'NotFoundError') {
-                throw new Error('No camera found on this device.');
+                if (isDesktop) {
+                    this.showMobileRecommendation();
+                } else {
+                    throw new Error('No camera found on this device.');
+                }
             } else {
                 throw new Error(`Camera error: ${error.message}`);
             }
+        }
+    }
+    
+    showMobileRecommendation() {
+        this.hideLoading();
+        const noCameraMsg = document.getElementById('no-camera-desktop');
+        if (noCameraMsg) {
+            noCameraMsg.classList.remove('hidden');
         }
     }
     
